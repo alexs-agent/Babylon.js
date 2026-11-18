@@ -76,7 +76,6 @@ import { type AnimationPropertyInfo } from "./glTFLoaderAnimation.pure";
 import { type IObjectInfo } from "core/ObjectModel/objectModelInterfaces";
 import { registeredGLTFExtensions, registerGLTFExtension, unregisterGLTFExtension, type GLTFExtensionFactory } from "./glTFLoaderExtensionRegistry";
 import { type IInterpolationPropertyInfo } from "core/FlowGraph/typeDefinitions";
-import { GetMappingForKey } from "./Extensions/objectModelMapping";
 import { deepMerge } from "core/Misc/deepMerger";
 import { GetTypedArrayConstructor } from "core/Buffers/bufferUtils";
 import { Lazy } from "core/Misc/lazy";
@@ -84,7 +83,12 @@ import { type IMaterialLoadingAdapter } from "./materialLoadingAdapter";
 
 // Caching these dynamic imports gives a surprising perf boost (compared to importing them directly each time).
 const LazyAnimationGroupModulePromise = /*#__PURE__*/ new Lazy(() => import("core/Animations/animationGroup.pure"));
-const LazyLoaderAnimationModulePromise = /*#__PURE__*/ new Lazy(() => import("./glTFLoaderAnimation.pure"));
+// The glTF object model (also used by KHR_animation_pointer and KHR_interactivity) is only needed here to look up the
+// interpolation of animation channels, so it is loaded together with the animation module instead of up front.
+const LazyLoaderAnimationModulePromise = /*#__PURE__*/ new Lazy(async () => {
+    const [animationModule, { GetMappingForKey }] = await Promise.all([import("./glTFLoaderAnimation.pure"), import("./Extensions/objectModelMapping")]);
+    return { ...animationModule, getMappingForKey: GetMappingForKey };
+});
 
 // Classes that only some assets need. _loadAsync loads them up front, based on what the asset contains, so models
 // without cameras, skins or morph targets don't pull them (and their dependencies) into the bundle.
@@ -1951,24 +1955,24 @@ export class GLTFLoader implements IGLTFLoader {
         }
 
         // async-load the animation sampler to provide the interpolation of the channelTargetPath
-        return LazyLoaderAnimationModulePromise.value.then(({ RegisterGLTFLoaderAnimation: registerGLTFLoaderAnimation }) => {
+        return LazyLoaderAnimationModulePromise.value.then(({ RegisterGLTFLoaderAnimation: registerGLTFLoaderAnimation, getMappingForKey }) => {
             registerGLTFLoaderAnimation();
             let properties: IInterpolationPropertyInfo[];
             switch (channelTargetPath) {
                 case AnimationChannelTargetPath.TRANSLATION: {
-                    properties = GetMappingForKey("/nodes/{}/translation")?.interpolation!;
+                    properties = getMappingForKey("/nodes/{}/translation")?.interpolation!;
                     break;
                 }
                 case AnimationChannelTargetPath.ROTATION: {
-                    properties = GetMappingForKey("/nodes/{}/rotation")?.interpolation!;
+                    properties = getMappingForKey("/nodes/{}/rotation")?.interpolation!;
                     break;
                 }
                 case AnimationChannelTargetPath.SCALE: {
-                    properties = GetMappingForKey("/nodes/{}/scale")?.interpolation!;
+                    properties = getMappingForKey("/nodes/{}/scale")?.interpolation!;
                     break;
                 }
                 case AnimationChannelTargetPath.WEIGHTS: {
-                    properties = GetMappingForKey("/nodes/{}/weights")?.interpolation!;
+                    properties = getMappingForKey("/nodes/{}/weights")?.interpolation!;
                     break;
                 }
                 default: {

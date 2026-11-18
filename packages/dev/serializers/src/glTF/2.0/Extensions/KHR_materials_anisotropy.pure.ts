@@ -3,12 +3,12 @@ import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
 import { type Nullable } from "core/types";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { type ProceduralTexture } from "core/Materials/Textures/Procedurals/proceduralTexture";
 import { MergeTexturesAsync, CreateRGBAConfiguration, CreateTextureInput, CreateConstantInput } from "core/Materials/Textures/textureMerger";
 import { GetSampledTextureKey } from "../glTFUtilities";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_anisotropy";
 
@@ -102,14 +102,14 @@ export class KHR_materials_anisotropy implements IGLTFExporterExtensionV2 {
      */
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
-        if (babylonMaterial instanceof PBRBaseMaterial) {
+        if (IsPBRBaseMaterial(babylonMaterial)) {
             if (babylonMaterial.anisotropy.isEnabled && !babylonMaterial.anisotropy.legacy) {
                 if (babylonMaterial.anisotropy.texture) {
                     additionalTextures.push(babylonMaterial.anisotropy.texture);
                 }
                 return additionalTextures;
             }
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             if (babylonMaterial.specularRoughnessAnisotropy > 0) {
                 const texId = GetAnisoTextureId(babylonMaterial);
                 if (this._anisoTexturesMap[texId]) {
@@ -131,7 +131,7 @@ export class KHR_materials_anisotropy implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRBaseMaterial) {
+            if (IsPBRBaseMaterial(babylonMaterial)) {
                 if (!babylonMaterial.anisotropy.isEnabled || babylonMaterial.anisotropy.legacy) {
                     resolve(node);
                     return;
@@ -154,7 +154,7 @@ export class KHR_materials_anisotropy implements IGLTFExporterExtensionV2 {
                 }
 
                 node.extensions[NAME] = anisotropyInfo;
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 if (babylonMaterial.specularRoughnessAnisotropy > 0) {
                     this._wasUsed = true;
 

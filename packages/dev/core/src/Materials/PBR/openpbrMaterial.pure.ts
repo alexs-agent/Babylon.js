@@ -2131,6 +2131,13 @@ export class OpenPBRMaterial extends OpenPBRMaterialBase {
     }
 
     /**
+     * Always true. Lets `IsOpenPBRMaterial()` recognize this class and its subclasses without importing it.
+     */
+    public get isOpenPBRMaterial(): true {
+        return true;
+    }
+
+    /**
      * @returns the name of the material class.
      */
     public override getClassName(): string {

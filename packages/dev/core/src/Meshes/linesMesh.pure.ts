@@ -149,6 +149,13 @@ export class LinesMesh extends Mesh {
     }
 
     /**
+     * Always true. Lets `IsLinesMesh()` recognize this class and its subclasses without importing it.
+     */
+    public get isLinesMesh(): true {
+        return true;
+    }
+
+    /**
      * @returns the string "LineMesh"
      */
     public override getClassName(): string {

@@ -127,6 +127,13 @@ export class MultiMaterial extends Material {
     }
 
     /**
+     * Always true. Lets `IsMultiMaterial()` recognize this class and its subclasses without importing it.
+     */
+    public get isMultiMaterial(): true {
+        return true;
+    }
+
+    /**
      * Gets the current class name of the material e.g. "MultiMaterial"
      * Mainly use in serialization.
      * @returns the class name

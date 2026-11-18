@@ -87,6 +87,13 @@ export class NullEngine extends Engine {
     private _options: NullEngineOptions;
 
     /**
+     * Always true. Lets `IsNullEngine()` recognize this class and its subclasses without importing it.
+     */
+    public get isNullEngine(): true {
+        return true;
+    }
+
+    /**
      * Gets a boolean indicating that the engine is running in deterministic lock step mode
      * @see https://doc.babylonjs.com/features/featuresDeepDive/animation/advanced_animations#deterministic-lockstep
      * @returns true if engine is in deterministic lock step mode

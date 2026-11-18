@@ -2,10 +2,9 @@ import { type IMaterial, type IKHRMaterialsDiffuseRoughness } from "babylonjs-gl
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { type Nullable } from "core/types";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_diffuse_roughness";
 
@@ -40,14 +39,14 @@ export class KHR_materials_diffuse_roughness implements IGLTFExporterExtensionV2
 
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
-        if (babylonMaterial instanceof PBRBaseMaterial) {
+        if (IsPBRBaseMaterial(babylonMaterial)) {
             if (babylonMaterial._baseDiffuseRoughness) {
                 if (babylonMaterial._baseDiffuseRoughnessTexture) {
                     additionalTextures.push(babylonMaterial._baseDiffuseRoughnessTexture);
                 }
                 return additionalTextures;
             }
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             if (babylonMaterial.baseDiffuseRoughness) {
                 if (babylonMaterial.baseDiffuseRoughnessTexture) {
                     additionalTextures.push(babylonMaterial.baseDiffuseRoughnessTexture);
@@ -64,10 +63,10 @@ export class KHR_materials_diffuse_roughness implements IGLTFExporterExtensionV2
         return new Promise((resolve) => {
             let diffuseRoughnessFactor: Nullable<number> = null;
             let diffuseRoughnessTexture: Nullable<BaseTexture> = null;
-            if (babylonMaterial instanceof PBRBaseMaterial) {
+            if (IsPBRBaseMaterial(babylonMaterial)) {
                 diffuseRoughnessFactor = babylonMaterial._baseDiffuseRoughness;
                 diffuseRoughnessTexture = babylonMaterial._baseDiffuseRoughnessTexture;
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 diffuseRoughnessFactor = babylonMaterial.baseDiffuseRoughness;
                 diffuseRoughnessTexture = babylonMaterial.baseDiffuseRoughnessTexture;
             }

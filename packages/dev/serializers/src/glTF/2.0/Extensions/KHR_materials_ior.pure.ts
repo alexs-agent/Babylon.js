@@ -2,8 +2,9 @@ import { type IMaterial, type IKHRMaterialsIor } from "babylonjs-gltf2interface"
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { type PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
+import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { IsOpenPBRMaterial, IsPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_ior";
 
@@ -38,9 +39,9 @@ export class KHR_materials_ior implements IGLTFExporterExtensionV2 {
         if (mat.unlit) {
             return false;
         }
-        if (mat instanceof OpenPBRMaterial) {
+        if (IsOpenPBRMaterial(mat)) {
             return mat.specularIor != 1.5; // 1.5 is normative default value.
-        } else if (mat instanceof PBRMaterial) {
+        } else if (IsPBRMaterial(mat)) {
             return mat.indexOfRefraction != undefined && mat.indexOfRefraction != 1.5; // 1.5 is normative default value.
         }
         return false;
@@ -56,7 +57,7 @@ export class KHR_materials_ior implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+            if (IsPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
                 this._wasUsed = true;
 
                 const iorInfo: IKHRMaterialsIor = {
@@ -64,7 +65,7 @@ export class KHR_materials_ior implements IGLTFExporterExtensionV2 {
                 };
                 node.extensions = node.extensions || {};
                 node.extensions[NAME] = iorInfo;
-            } else if (babylonMaterial instanceof OpenPBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+            } else if (IsOpenPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
                 this._wasUsed = true;
                 const iorInfo: IKHRMaterialsIor = {
                     ior: babylonMaterial.specularIor,

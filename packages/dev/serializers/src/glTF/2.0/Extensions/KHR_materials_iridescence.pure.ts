@@ -2,9 +2,8 @@ import { type IMaterial, type IKHRMaterialsIridescence } from "babylonjs-gltf2in
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_iridescence";
 
@@ -39,7 +38,7 @@ export class KHR_materials_iridescence implements IGLTFExporterExtensionV2 {
 
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
-        if (babylonMaterial instanceof PBRBaseMaterial) {
+        if (IsPBRBaseMaterial(babylonMaterial)) {
             if (babylonMaterial.iridescence.isEnabled) {
                 if (babylonMaterial.iridescence.texture) {
                     additionalTextures.push(babylonMaterial.iridescence.texture);
@@ -49,7 +48,7 @@ export class KHR_materials_iridescence implements IGLTFExporterExtensionV2 {
                 }
                 return additionalTextures;
             }
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             if (babylonMaterial.thinFilmWeight > 0) {
                 if (babylonMaterial.thinFilmWeightTexture) {
                     additionalTextures.push(babylonMaterial.thinFilmWeightTexture);
@@ -66,7 +65,7 @@ export class KHR_materials_iridescence implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRBaseMaterial) {
+            if (IsPBRBaseMaterial(babylonMaterial)) {
                 if (!babylonMaterial.iridescence.isEnabled) {
                     resolve(node);
                     return;
@@ -94,7 +93,7 @@ export class KHR_materials_iridescence implements IGLTFExporterExtensionV2 {
                 }
 
                 node.extensions[NAME] = iridescenceInfo;
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 if (babylonMaterial.thinFilmWeight <= 0) {
                     resolve(node);
                     return;

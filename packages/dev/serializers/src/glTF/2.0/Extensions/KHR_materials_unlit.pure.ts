@@ -2,8 +2,7 @@ import { type IMaterial } from "babylonjs-gltf2interface";
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
-import { StandardMaterial } from "core/Materials/standardMaterial.pure";
+import { IsPBRMaterial, IsStandardMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_unlit";
 
@@ -37,9 +36,9 @@ export class KHR_materials_unlit implements IGLTFExporterExtensionV2 {
         return new Promise((resolve) => {
             let unlitMaterial = false;
 
-            if (babylonMaterial instanceof PBRMaterial) {
+            if (IsPBRMaterial(babylonMaterial)) {
                 unlitMaterial = babylonMaterial.unlit;
-            } else if (babylonMaterial instanceof StandardMaterial) {
+            } else if (IsStandardMaterial(babylonMaterial)) {
                 unlitMaterial = babylonMaterial.disableLighting;
             }
 

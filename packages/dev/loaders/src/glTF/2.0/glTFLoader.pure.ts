@@ -7,13 +7,13 @@ import { Quaternion, Vector3, Matrix, TmpVectors } from "core/Maths/math.vector.
 import { Color3 } from "core/Maths/math.color.pure";
 import { Tools } from "core/Misc/tools.pure";
 import { Camera } from "core/Cameras/camera.pure";
-import { FreeCamera } from "core/Cameras/freeCamera.pure";
+import { type FreeCamera } from "core/Cameras/freeCamera.pure";
 import { type Animation } from "core/Animations/animation";
 import { type IAnimatable } from "core/Animations/animatable.interface";
 import { type IAnimationKey, AnimationKeyInterpolation } from "core/Animations/animationKey";
 import { type AnimationGroup } from "core/Animations/animationGroup.pure";
-import { Bone } from "core/Bones/bone";
-import { Skeleton } from "core/Bones/skeleton";
+import { type Bone } from "core/Bones/bone";
+import { type Skeleton } from "core/Bones/skeleton";
 import { Material } from "core/Materials/material";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { type ITextureCreationOptions, Texture } from "core/Materials/Textures/texture.pure";
@@ -22,8 +22,8 @@ import { Buffer, VertexBuffer, VertexBufferForEach, VertexBufferGetTypeByteLengt
 import { Geometry } from "core/Meshes/geometry";
 import { AbstractMesh } from "core/Meshes/abstractMesh.pure";
 import { Mesh } from "core/Meshes/mesh.pure";
-import { MorphTarget } from "core/Morph/morphTarget";
-import { MorphTargetManager } from "core/Morph/morphTargetManager";
+import { type MorphTarget } from "core/Morph/morphTarget";
+import { type MorphTargetManager } from "core/Morph/morphTargetManager";
 import { type ISceneLoaderAsyncResult, type ISceneLoaderProgressEvent } from "core/Loading/sceneLoader";
 import { type Scene } from "core/scene";
 import {
@@ -85,6 +85,28 @@ import { type IMaterialLoadingAdapter } from "./materialLoadingAdapter";
 // Caching these dynamic imports gives a surprising perf boost (compared to importing them directly each time).
 const LazyAnimationGroupModulePromise = /*#__PURE__*/ new Lazy(() => import("core/Animations/animationGroup.pure"));
 const LazyLoaderAnimationModulePromise = /*#__PURE__*/ new Lazy(() => import("./glTFLoaderAnimation.pure"));
+
+// Classes that only some assets need. _loadAsync loads them up front, based on what the asset contains, so models
+// without cameras, skins or morph targets don't pull them (and their dependencies) into the bundle.
+let FreeCameraClass: Nullable<typeof FreeCamera> = null;
+let SkeletonClass: Nullable<typeof Skeleton> = null;
+let BoneClass: Nullable<typeof Bone> = null;
+let MorphTargetManagerClass: Nullable<typeof MorphTargetManager> = null;
+let MorphTargetClass: Nullable<typeof MorphTarget> = null;
+const LazyCameraClassesPromise = /*#__PURE__*/ new Lazy(async () => {
+    const { FreeCamera } = await import("core/Cameras/freeCamera.pure");
+    FreeCameraClass = FreeCamera;
+});
+const LazySkinClassesPromise = /*#__PURE__*/ new Lazy(async () => {
+    const [{ Skeleton }, { Bone }] = await Promise.all([import("core/Bones/skeleton"), import("core/Bones/bone.pure")]);
+    SkeletonClass = Skeleton;
+    BoneClass = Bone;
+});
+const LazyMorphTargetClassesPromise = /*#__PURE__*/ new Lazy(async () => {
+    const [{ MorphTargetManager }, { MorphTarget }] = await Promise.all([import("core/Morph/morphTargetManager"), import("core/Morph/morphTarget")]);
+    MorphTargetManagerClass = MorphTargetManager;
+    MorphTargetClass = MorphTarget;
+});
 
 export { GLTFFileLoader };
 
@@ -467,6 +489,27 @@ export class GLTFLoader implements IGLTFLoader {
         return await this._loadAsync(rootUrl, fileName, null, () => undefined);
     }
 
+    /**
+     * Loads the classes that only some assets need (cameras, skins, morph targets), based on the asset's contents.
+     * @returns A promise that resolves when the needed classes are loaded
+     */
+    private async _loadOptionalClassesAsync(): Promise<void> {
+        const gltf = this._gltf;
+        const promises: Promise<void>[] = [];
+        if (!FreeCameraClass && gltf.cameras?.length) {
+            promises.push(LazyCameraClassesPromise.value);
+        }
+        if (!SkeletonClass && gltf.skins?.length) {
+            promises.push(LazySkinClassesPromise.value);
+        }
+        if (!MorphTargetManagerClass && gltf.meshes?.some((mesh) => mesh.primitives?.some((primitive) => primitive.targets?.length))) {
+            promises.push(LazyMorphTargetClassesPromise.value);
+        }
+        if (promises.length) {
+            await Promise.all(promises);
+        }
+    }
+
     private async _loadAsync<T>(rootUrl: string, fileName: string, nodes: Nullable<Array<number>>, resultFunc: () => T): Promise<T> {
         return await Promise.resolve()
             .then(async () => {
@@ -476,6 +519,8 @@ export class GLTFLoader implements IGLTFLoader {
                 this._allMaterialsDirtyRequired = false;
 
                 await this._loadExtensionsAsync();
+
+                await this._loadOptionalClassesAsync();
 
                 if (!this.parent.skipMaterials) {
                     const needsOpenPBR = this.parent.useOpenPBR || this.isExtensionUsed("KHR_materials_openpbr");
@@ -1332,7 +1377,14 @@ export class GLTFLoader implements IGLTFLoader {
 
         const targetNames = mesh.extras ? mesh.extras.targetNames : null;
 
-        babylonMesh.morphTargetManager = this._babylonScene._executeWithBlockedEntityCollection(!!this._assetContainer, () => new MorphTargetManager(this._babylonScene));
+        const morphTargetManagerClass = MorphTargetManagerClass;
+        const morphTargetClass = MorphTargetClass;
+        if (!morphTargetManagerClass || !morphTargetClass) {
+            // _loadOptionalClassesAsync loads these for every asset whose meshes have morph targets.
+            throw new Error(`${context}: Morph target classes are not loaded`);
+        }
+
+        babylonMesh.morphTargetManager = this._babylonScene._executeWithBlockedEntityCollection(!!this._assetContainer, () => new morphTargetManagerClass(this._babylonScene));
         babylonMesh.morphTargetManager._parentContainer = this._assetContainer;
 
         babylonMesh.morphTargetManager.areUpdatesFrozen = true;
@@ -1340,7 +1392,7 @@ export class GLTFLoader implements IGLTFLoader {
         for (let index = 0; index < primitive.targets.length; index++) {
             const weight = node.weights ? node.weights[index] : mesh.weights ? mesh.weights[index] : 0;
             const name = targetNames ? targetNames[index] : `morphTarget${index}`;
-            babylonMesh.morphTargetManager.addTarget(new MorphTarget(name, weight, babylonMesh.getScene()));
+            babylonMesh.morphTargetManager.addTarget(new morphTargetClass(name, weight, babylonMesh.getScene()));
             // TODO: tell the target whether it has positions, normals, tangents
         }
     }
@@ -1377,7 +1429,7 @@ export class GLTFLoader implements IGLTFLoader {
                 // In the vertex-attribute fallback path the active set is hard-capped at
                 // MaxActiveMorphTargetsInVertexAttributeMode, so only pin when texture storage is used or the target
                 // count fits within that cap; otherwise NUM_MORPH_INFLUENCERS would exceed the bound attributes.
-                if (morphTargetManager.isUsingTextureForTargets || morphTargetManager.numTargets <= MorphTargetManager.MaxActiveMorphTargetsInVertexAttributeMode) {
+                if (morphTargetManager.isUsingTextureForTargets || morphTargetManager.numTargets <= MorphTargetManagerClass!.MaxActiveMorphTargetsInVertexAttributeMode) {
                     morphTargetManager.optimizeInfluencers = false;
                     morphTargetManager.numMaxInfluencers = morphTargetManager.numTargets;
                 }
@@ -1532,6 +1584,12 @@ export class GLTFLoader implements IGLTFLoader {
             return Promise.resolve();
         }
 
+        const skeletonClass = SkeletonClass;
+        if (!skeletonClass) {
+            // Normally loaded up front by _loadOptionalClassesAsync; load it now if this skin wasn't known then.
+            return LazySkinClassesPromise.value.then(async () => await this._loadSkinAsync(context, node, skin, assign));
+        }
+
         const extensionPromise = this._extensionsLoadSkinAsync(context, node, skin);
         if (extensionPromise) {
             return extensionPromise;
@@ -1545,7 +1603,7 @@ export class GLTFLoader implements IGLTFLoader {
         const skeletonId = `skeleton${skin.index}`;
         const babylonSkeleton = this._babylonScene._executeWithBlockedEntityCollection(
             !!this._assetContainer,
-            () => new Skeleton(skin.name || skeletonId, skeletonId, this._babylonScene)
+            () => new skeletonClass(skin.name || skeletonId, skeletonId, this._babylonScene)
         );
         babylonSkeleton._parentContainer = this._assetContainer;
 
@@ -1652,7 +1710,7 @@ export class GLTFLoader implements IGLTFLoader {
         }
 
         const boneIndex = skin.joints.indexOf(node.index);
-        babylonBone = new Bone(node.name || `joint${node.index}`, babylonSkeleton, parentBabylonBone, this._getNodeMatrix(node), null, null, boneIndex);
+        babylonBone = new BoneClass!(node.name || `joint${node.index}`, babylonSkeleton, parentBabylonBone, this._getNodeMatrix(node), null, null, boneIndex);
         babylonBones[node.index] = babylonBone;
 
         // Wait until the scene is loaded to ensure the transform nodes are loaded.
@@ -1711,6 +1769,12 @@ export class GLTFLoader implements IGLTFLoader {
      * @returns A promise that resolves with the loaded Babylon camera when the load is complete
      */
     public loadCameraAsync(context: string, camera: ICamera, assign: (babylonCamera: Camera) => void = () => {}): Promise<Camera> {
+        const freeCameraClass = FreeCameraClass;
+        if (!freeCameraClass) {
+            // Normally loaded up front by _loadOptionalClassesAsync; load it now if this camera wasn't known then.
+            return LazyCameraClassesPromise.value.then(async () => await this.loadCameraAsync(context, camera, assign));
+        }
+
         const extensionPromise = this._extensionsLoadCameraAsync(context, camera, assign);
         if (extensionPromise) {
             return extensionPromise;
@@ -1722,7 +1786,7 @@ export class GLTFLoader implements IGLTFLoader {
 
         const babylonCamera = this._babylonScene._executeWithBlockedEntityCollection(
             !!this._assetContainer,
-            () => new FreeCamera(camera.name || `camera${camera.index}`, Vector3.Zero(), this._babylonScene, false)
+            () => new freeCameraClass(camera.name || `camera${camera.index}`, Vector3.Zero(), this._babylonScene, false)
         );
         babylonCamera._parentContainer = this._assetContainer;
         camera._babylonCamera = babylonCamera;

@@ -4,7 +4,7 @@
 import { expandToProperty } from "../../Misc/decorators";
 import { Logger } from "../../Misc/logger";
 import { SmartArray } from "../../Misc/smartArray";
-import { GetEnvironmentBRDFTexture } from "../../Misc/brdfTextureTools";
+import { GetEnvironmentBRDFTexture } from "../../Misc/environmentBRDFTexture";
 import { type Nullable } from "../../types";
 import { Scene } from "../../scene.pure";
 import { type Matrix, Vector4 } from "../../Maths/math.vector.pure";

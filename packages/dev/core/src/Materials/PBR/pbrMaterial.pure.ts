@@ -1,7 +1,7 @@
 /** This file must only contain pure code and pure imports */
 
 import { serialize, serializeAsColor3, expandToProperty, serializeAsTexture } from "../../Misc/decorators";
-import { GetEnvironmentBRDFTexture } from "../../Misc/brdfTextureTools";
+import { GetEnvironmentBRDFTexture } from "../../Misc/environmentBRDFTexture";
 import { type Nullable } from "../../types";
 import { type Scene } from "../../scene.pure";
 import { Color3 } from "../../Maths/math.color.pure";

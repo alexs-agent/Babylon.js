@@ -2,7 +2,8 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 import { serialize, expandToProperty, addAccessorsForMaterialProperty } from "../../Misc/decorators";
-import { GetEnvironmentFuzzBRDFTexture, GetOpenPBREnvironmentBRDFTexture } from "../../Misc/brdfTextureTools";
+import { GetEnvironmentFuzzBRDFTexture } from "../../Misc/environmentFuzzBRDFTexture";
+import { GetOpenPBREnvironmentBRDFTexture } from "../../Misc/openPBREnvironmentBRDFTexture";
 import { type Nullable } from "../../types";
 import { type Scene } from "../../scene.pure";
 import { Color3, Color4 } from "../../Maths/math.color.pure";

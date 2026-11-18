@@ -19,7 +19,7 @@ import { editableInPropertyPage, PropertyTypeForEdition } from "../../../../Deco
 import { NodeMaterialConnectionPointCustomObject } from "../../nodeMaterialConnectionPointCustomObject";
 import { SheenBlock } from "./sheenBlock.pure";
 import { type BaseTexture } from "../../../Textures/baseTexture.pure";
-import { GetEnvironmentBRDFTexture } from "../../../../Misc/brdfTextureTools";
+import { GetEnvironmentBRDFTexture } from "../../../../Misc/environmentBRDFTexture";
 import { MaterialFlags } from "../../../materialFlags";
 import { AnisotropyBlock } from "./anisotropyBlock.pure";
 import { ReflectionBlock } from "./reflectionBlock.pure";

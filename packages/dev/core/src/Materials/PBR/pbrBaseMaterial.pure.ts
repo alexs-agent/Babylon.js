@@ -963,8 +963,9 @@ export abstract class PBRBaseMaterial extends PBRBaseMaterialBase {
 
     /**
      * Always true. Lets `IsPBRBaseMaterial()` recognize this class and its subclasses without importing it.
+     * @internal
      */
-    public get isPBRBaseMaterial(): true {
+    public get _isPBRBaseMaterial(): true {
         return true;
     }
 

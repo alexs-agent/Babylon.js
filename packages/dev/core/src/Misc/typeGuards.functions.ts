@@ -2,7 +2,7 @@
  * Type guards that work like `instanceof` (subclasses included) without loading the class.
  * Use them when a module needs a class only to check an object's type, so that the class
  * (and, for materials, its shaders) is not pulled into bundles that never use it.
- * Each guard reads an always-true getter declared on the class, such as `isPBRBaseMaterial`.
+ * Each guard reads an always-true getter declared on the class, such as `_isPBRBaseMaterial`.
  * Keep the imports in this file type-only.
  */
 
@@ -21,7 +21,7 @@ import { type LinesMesh } from "../Meshes/linesMesh.pure";
  * @returns true if obj is a NullEngine
  */
 export function IsNullEngine(obj: any): obj is NullEngine {
-    return obj?.isNullEngine === true;
+    return obj?._isNullEngine === true;
 }
 
 /**
@@ -30,7 +30,7 @@ export function IsNullEngine(obj: any): obj is NullEngine {
  * @returns true if obj is a MultiMaterial
  */
 export function IsMultiMaterial(obj: any): obj is MultiMaterial {
-    return obj?.isMultiMaterial === true;
+    return obj?._isMultiMaterial === true;
 }
 
 /**
@@ -39,7 +39,7 @@ export function IsMultiMaterial(obj: any): obj is MultiMaterial {
  * @returns true if obj is an OpenPBRMaterial
  */
 export function IsOpenPBRMaterial(obj: any): obj is OpenPBRMaterial {
-    return obj?.isOpenPBRMaterial === true;
+    return obj?._isOpenPBRMaterial === true;
 }
 
 /**
@@ -48,7 +48,7 @@ export function IsOpenPBRMaterial(obj: any): obj is OpenPBRMaterial {
  * @returns true if obj is a PBRBaseMaterial
  */
 export function IsPBRBaseMaterial(obj: any): obj is PBRBaseMaterial {
-    return obj?.isPBRBaseMaterial === true;
+    return obj?._isPBRBaseMaterial === true;
 }
 
 /**
@@ -57,7 +57,7 @@ export function IsPBRBaseMaterial(obj: any): obj is PBRBaseMaterial {
  * @returns true if obj is a PBRMaterial
  */
 export function IsPBRMaterial(obj: any): obj is PBRMaterial {
-    return obj?.isPBRMaterial === true;
+    return obj?._isPBRMaterial === true;
 }
 
 /**
@@ -66,7 +66,7 @@ export function IsPBRMaterial(obj: any): obj is PBRMaterial {
  * @returns true if obj is a StandardMaterial
  */
 export function IsStandardMaterial(obj: any): obj is StandardMaterial {
-    return obj?.isStandardMaterial === true;
+    return obj?._isStandardMaterial === true;
 }
 
 /**
@@ -75,7 +75,7 @@ export function IsStandardMaterial(obj: any): obj is StandardMaterial {
  * @returns true if obj is a GreasedLineBaseMesh
  */
 export function IsGreasedLineBaseMesh(obj: any): obj is GreasedLineBaseMesh {
-    return obj?.isGreasedLineBaseMesh === true;
+    return obj?._isGreasedLineBaseMesh === true;
 }
 
 /**
@@ -84,5 +84,5 @@ export function IsGreasedLineBaseMesh(obj: any): obj is GreasedLineBaseMesh {
  * @returns true if obj is a LinesMesh
  */
 export function IsLinesMesh(obj: any): obj is LinesMesh {
-    return obj?.isLinesMesh === true;
+    return obj?._isLinesMesh === true;
 }

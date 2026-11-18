@@ -662,8 +662,9 @@ export class StandardMaterial extends StandardMaterialBase {
 
     /**
      * Always true. Lets `IsStandardMaterial()` recognize this class and its subclasses without importing it.
+     * @internal
      */
-    public get isStandardMaterial(): true {
+    public get _isStandardMaterial(): true {
         return true;
     }
 

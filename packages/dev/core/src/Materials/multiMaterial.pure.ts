@@ -128,8 +128,9 @@ export class MultiMaterial extends Material {
 
     /**
      * Always true. Lets `IsMultiMaterial()` recognize this class and its subclasses without importing it.
+     * @internal
      */
-    public get isMultiMaterial(): true {
+    public get _isMultiMaterial(): true {
         return true;
     }
 

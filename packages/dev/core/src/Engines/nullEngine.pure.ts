@@ -88,8 +88,9 @@ export class NullEngine extends Engine {
 
     /**
      * Always true. Lets `IsNullEngine()` recognize this class and its subclasses without importing it.
+     * @internal
      */
-    public get isNullEngine(): true {
+    public get _isNullEngine(): true {
         return true;
     }
 

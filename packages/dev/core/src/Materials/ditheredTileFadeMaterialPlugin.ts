@@ -9,10 +9,11 @@ import { type Nullable } from "../types";
 import { Vector4 } from "../Maths/math.vector.pure";
 import { MaterialPluginBase } from "./materialPluginBase.pure";
 import { type MaterialDefines } from "./materialDefines";
-import { PBRBaseMaterial } from "./PBR/pbrBaseMaterial.pure";
+import { type PBRBaseMaterial } from "./PBR/pbrBaseMaterial.pure";
 import { ShaderLanguage } from "./shaderLanguage";
-import { StandardMaterial } from "./standardMaterial.pure";
+import { type StandardMaterial } from "./standardMaterial.pure";
 import { type UniformBuffer } from "./uniformBuffer";
+import { IsPBRBaseMaterial, IsStandardMaterial } from "../Misc/typeGuards.functions";
 
 /**
  * The material families supported by {@link DitheredTileFadeMaterialPlugin}.
@@ -514,7 +515,7 @@ if (shouldDiscardDitheredTileFragment(gl_FragCoord.xy, ditheredFadeSettings, vDi
     }
 
     private static _ValidateMaterial(material: DitheredTileFadeSupportedMaterial): void {
-        if (!(material instanceof StandardMaterial) && !(material instanceof PBRBaseMaterial)) {
+        if (!IsStandardMaterial(material) && !IsPBRBaseMaterial(material)) {
             throw new TypeError("DitheredTileFadeMaterialPlugin supports only StandardMaterial and PBRBaseMaterial-derived materials.");
         }
     }

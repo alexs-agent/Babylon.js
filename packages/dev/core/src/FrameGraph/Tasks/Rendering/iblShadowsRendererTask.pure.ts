@@ -10,12 +10,13 @@ import { FrameGraphIblShadowsSpatialBlurTask } from "./iblShadows/iblShadowsSpat
 import { FrameGraphIblShadowsTracingTask } from "./iblShadows/iblShadowsTracingTask";
 import { FrameGraphIblShadowsVoxelizationTask } from "./iblShadows/iblShadowsVoxelizationTask";
 import { Texture } from "core/Materials/Textures/texture.pure";
-import { CubeTexture } from "core/Materials/Textures/cubeTexture.pure";
+import { type CubeTexture } from "core/Materials/Textures/cubeTexture.pure";
 import { Tools } from "core/Misc/tools.pure";
 import { Observable } from "core/Misc/observable.pure";
 import { IblCdfGenerator } from "core/Rendering/iblCdfGenerator";
 import { RegisterIblCdfGeneratorSceneComponent } from "core/Rendering/iblCdfGeneratorSceneComponent.pure";
 import { FrameGraphTask } from "../../frameGraphTask";
+import { IsCubeTexture } from "core/Misc/typeGuards.functions";
 
 /**
  * Composite task that owns the individual IBL shadows frame graph tasks.
@@ -609,7 +610,7 @@ export class FrameGraphIblShadowsRendererTask extends FrameGraphTask {
 
     private _observeEnvironmentTexture(): void {
         const env = this._frameGraph.scene.environmentTexture;
-        const currentEnvironmentTexture = env instanceof Texture || env instanceof CubeTexture ? env : null;
+        const currentEnvironmentTexture = env instanceof Texture || IsCubeTexture(env) ? env : null;
 
         if (currentEnvironmentTexture === this._observedEnvironmentTexture) {
             return;
@@ -624,7 +625,7 @@ export class FrameGraphIblShadowsRendererTask extends FrameGraphTask {
             if (observer) {
                 this._observedEnvironmentTextureUnsubscribe = () => currentEnvironmentTexture.onLoadObservable.remove(observer);
             }
-        } else if (currentEnvironmentTexture instanceof CubeTexture) {
+        } else if (IsCubeTexture(currentEnvironmentTexture)) {
             const observer = currentEnvironmentTexture.onLoadObservable.add(this._onEnvironmentTextureLoaded);
             if (observer) {
                 this._observedEnvironmentTextureUnsubscribe = () => currentEnvironmentTexture.onLoadObservable.remove(observer);

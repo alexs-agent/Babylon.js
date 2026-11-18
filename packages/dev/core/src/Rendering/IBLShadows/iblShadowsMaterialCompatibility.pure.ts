@@ -1,9 +1,7 @@
 /** This file must only contain pure code and pure imports */
 
 import { type Material } from "core/Materials/material.pure";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
-import { StandardMaterial } from "core/Materials/standardMaterial.pure";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial, IsStandardMaterial } from "core/Misc/typeGuards.functions";
 
 /**
  * Determines whether a material can receive IBL shadows by hosting an `IBLShadowsPluginMaterial`.
@@ -16,9 +14,9 @@ import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
  */
 export function IsIBLShadowsReceiverCompatible(material: Material): boolean {
     return (
-        material instanceof PBRBaseMaterial ||
-        material instanceof StandardMaterial ||
-        material instanceof OpenPBRMaterial ||
+        IsPBRBaseMaterial(material) ||
+        IsStandardMaterial(material) ||
+        IsOpenPBRMaterial(material) ||
         // ShadowOnlyMaterial lives in the separate `materials` package (which `core` cannot import),
         // so it is identified by class name rather than `instanceof`.
         material.getClassName() === "ShadowOnlyMaterial"

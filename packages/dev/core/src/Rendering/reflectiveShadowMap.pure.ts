@@ -13,13 +13,14 @@ import { type Material } from "core/Materials/material.pure";
 import { type StandardMaterial } from "core/Materials/standardMaterial.pure";
 import { MaterialDefines } from "core/Materials/materialDefines";
 import { type SpotLight } from "core/Lights/spotLight.pure";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
+import { type PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { expandToProperty, serialize } from "core/Misc/decorators";
 import { Light } from "core/Lights/light";
 import { type DirectionalLight } from "core/Lights/directionalLight.pure";
 import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { type Nullable } from "core/types";
 import { RegisterClass } from "core/Misc/typeStore";
+import { IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 /**
  * Reflective Shadow Maps were first described in http://www.klayge.org/material/3_12/GI/rsm.pdf by Carsten Dachsbacher and Marc Stamminger
@@ -375,7 +376,7 @@ export class RSMCreatePluginMaterial extends MaterialPluginBase {
 
         this._internalMarkAllSubMeshesAsTexturesDirty = material._dirtyCallbacks[Constants.MATERIAL_TextureDirtyFlag];
 
-        this._varAlbedoName = material instanceof PBRBaseMaterial ? "surfaceAlbedo" : "baseColor.rgb";
+        this._varAlbedoName = IsPBRBaseMaterial(material) ? "surfaceAlbedo" : "baseColor.rgb";
     }
 
     /**

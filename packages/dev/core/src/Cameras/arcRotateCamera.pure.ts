@@ -1792,6 +1792,14 @@ export class ArcRotateCamera extends TargetCamera {
     }
 
     /**
+     * Always true. Lets `IsArcRotateCamera()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isArcRotateCamera(): true {
+        return true;
+    }
+
+    /**
      * Gets the current object class name.
      * @returns the class name
      */

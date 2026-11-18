@@ -82,6 +82,14 @@ export class PointLight extends ShadowLight {
     }
 
     /**
+     * Always true. Lets `IsPointLight()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isPointLight(): true {
+        return true;
+    }
+
+    /**
      * Returns the string "PointLight"
      * @returns the class name
      */

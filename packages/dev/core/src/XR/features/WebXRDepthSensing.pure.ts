@@ -18,13 +18,13 @@ import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { type Material } from "core/Materials/material.pure";
 import { MaterialDefines } from "core/Materials/materialDefines";
 import { type UniformBuffer } from "core/Materials/uniformBuffer";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { RegisterMaterialPlugin, UnregisterMaterialPlugin } from "core/Materials/materialPluginManager.pure";
 import { type Camera } from "core/Cameras/camera.pure";
 import { Matrix } from "core/Maths/math.vector.pure";
 import { type Engine } from "core/Engines/engine.pure";
 import { RegisterClass } from "../../Misc/typeStore";
 import { WebXRGraphicsBindingType } from "../webXRGraphicsBinding";
+import { IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 export type WebXRDepthUsage = "cpu" | "gpu";
 export type WebXRDepthDataFormat = "ushort" | "float" | "luminance-alpha";
@@ -172,7 +172,7 @@ class WebXRDepthSensingMaterialPlugin extends MaterialPluginBase {
 
     constructor(material: Material) {
         super(material, "DepthSensing", 222, new DepthSensingMaterialDefines());
-        this._varColorName = material instanceof PBRBaseMaterial ? "finalColor" : "color";
+        this._varColorName = IsPBRBaseMaterial(material) ? "finalColor" : "color";
         this.doNotSerialize = true;
         ManagedMaterialPlugins.push(this);
     }

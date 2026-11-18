@@ -6,6 +6,11 @@
  * Keep the imports in this file type-only.
  */
 
+import { type ArcRotateCamera } from "../Cameras/arcRotateCamera.pure";
+import { type DirectionalLight } from "../Lights/directionalLight.pure";
+import { type SpotLight } from "../Lights/spotLight.pure";
+import { type PointLight } from "../Lights/pointLight.pure";
+import { type CubeTexture } from "../Materials/Textures/cubeTexture.pure";
 import { type NullEngine } from "../Engines/nullEngine.pure";
 import { type MultiMaterial } from "../Materials/multiMaterial.pure";
 import { type OpenPBRMaterial } from "../Materials/PBR/openpbrMaterial.pure";
@@ -85,4 +90,49 @@ export function IsGreasedLineBaseMesh(obj: any): obj is GreasedLineBaseMesh {
  */
 export function IsLinesMesh(obj: any): obj is LinesMesh {
     return obj?._isLinesMesh === true;
+}
+
+/**
+ * Checks whether an object is an ArcRotateCamera or a subclass of it, without loading ArcRotateCamera.
+ * @param obj defines the object to check
+ * @returns true if obj is an ArcRotateCamera
+ */
+export function IsArcRotateCamera(obj: any): obj is ArcRotateCamera {
+    return obj?._isArcRotateCamera === true;
+}
+
+/**
+ * Checks whether an object is a DirectionalLight or a subclass of it, without loading DirectionalLight.
+ * @param obj defines the object to check
+ * @returns true if obj is a DirectionalLight
+ */
+export function IsDirectionalLight(obj: any): obj is DirectionalLight {
+    return obj?._isDirectionalLight === true;
+}
+
+/**
+ * Checks whether an object is a SpotLight or a subclass of it, without loading SpotLight.
+ * @param obj defines the object to check
+ * @returns true if obj is a SpotLight
+ */
+export function IsSpotLight(obj: any): obj is SpotLight {
+    return obj?._isSpotLight === true;
+}
+
+/**
+ * Checks whether an object is a PointLight or a subclass of it, without loading PointLight.
+ * @param obj defines the object to check
+ * @returns true if obj is a PointLight
+ */
+export function IsPointLight(obj: any): obj is PointLight {
+    return obj?._isPointLight === true;
+}
+
+/**
+ * Checks whether an object is a CubeTexture or a subclass of it, without loading CubeTexture.
+ * @param obj defines the object to check
+ * @returns true if obj is a CubeTexture
+ */
+export function IsCubeTexture(obj: any): obj is CubeTexture {
+    return obj?._isCubeTexture === true;
 }

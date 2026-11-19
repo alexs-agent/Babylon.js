@@ -6,17 +6,9 @@ import { Color3, Color4 } from "core/Maths/math.color.pure";
 import { Constants } from "core/Engines/constants";
 import { type IMaterialLoadingAdapter } from "./materialLoadingAdapter";
 import { type GLTFLoader } from "./glTFLoader";
-import {
-    CreateFactorOperand,
-    CreateTextureWithFactorOperand,
-    ExtractMaxChannelAsync,
-    type ITextureProcessOperand,
-    type ITextureProcessorOutputOptions,
-    LerpTexturesAsync,
-    TextureChannel,
-    TextureColorSpace,
-    ThinWalledScatterWeightsAsync,
-} from "core/Materials/Textures/textureProcessor";
+// Only types are imported statically: the texture processor (and the procedural/render-target textures it
+// pulls in) is loaded on demand, when an asset actually uses KHR_materials_scatter.
+import { type ITextureProcessOperand, type ITextureProcessorOutputOptions } from "core/Materials/Textures/textureProcessor";
 import { type Scene } from "core/scene";
 
 /**
@@ -143,6 +135,8 @@ export class PBRMaterialLoadingAdapter implements IMaterialLoadingAdapter {
         const oldIntensityTexture = subSurface.translucencyIntensityTexture;
         const diffuseFactor = this.subsurfaceWeight;
         const diffuseTex = diffuseFactor > 0 ? oldIntensityTexture : null;
+        const { CreateFactorOperand, CreateTextureWithFactorOperand, ExtractMaxChannelAsync, LerpTexturesAsync, TextureChannel, TextureColorSpace } =
+            await import("core/Materials/Textures/textureProcessor");
 
         // The translucency intensity is read from the alpha channel, but T is in the red channel of the
         // transmission texture and the channel swizzles keep the source alpha. So T is first broadcast to all
@@ -213,6 +207,7 @@ export class PBRMaterialLoadingAdapter implements IMaterialLoadingAdapter {
         const transmissionTex = subSurface.refractionIntensityTexture;
         const scene = this._material.getScene();
         const name = this._material.name;
+        const { CreateTextureWithFactorOperand, TextureChannel, ThinWalledScatterWeightsAsync } = await import("core/Materials/Textures/textureProcessor");
 
         // The weights are computed from the red channel of T and S and broadcast to all four channels, so
         // they serve both PBR's refraction intensity (red) and translucency intensity (alpha). T is passed

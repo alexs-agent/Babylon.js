@@ -28,6 +28,7 @@ export * from "./virtualJoystick";
 export * from "./workerPool";
 export * from "./logger";
 export * from "./typeStore";
+export * from "./typeGuards.functions";
 export * from "./filesInputStore";
 export * from "./deepCopier";
 export * from "./deepMerger";

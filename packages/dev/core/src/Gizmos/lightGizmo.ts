@@ -9,15 +9,14 @@ import { StandardMaterial } from "../Materials/standardMaterial.pure";
 import { type Light } from "../Lights/light";
 import { type Scene } from "../scene";
 import { HemisphericLight } from "../Lights/hemisphericLight.pure";
-import { DirectionalLight } from "../Lights/directionalLight.pure";
 import { CreateSphere } from "../Meshes/Builders/sphereBuilder.pure";
 import { CreateHemisphere } from "../Meshes/Builders/hemisphereBuilder.pure";
-import { SpotLight } from "../Lights/spotLight.pure";
 import { TransformNode } from "../Meshes/transformNode.pure";
 import { type PointerInfo, PointerEventTypes } from "../Events/pointerEvents";
 import { type Observer, Observable } from "../Misc/observable";
 import { CreateCylinder } from "../Meshes/Builders/cylinderBuilder.pure";
 import { Logger } from "core/Misc/logger";
+import { IsDirectionalLight, IsSpotLight } from "../Misc/typeGuards.functions";
 
 /**
  * Interface for light gizmo
@@ -99,9 +98,9 @@ export class LightGizmo extends Gizmo implements ILightGizmo {
 
             if (light instanceof HemisphericLight) {
                 this._lightMesh = LightGizmo._CreateHemisphericLightMesh(this.gizmoLayer.utilityLayerScene);
-            } else if (light instanceof DirectionalLight) {
+            } else if (IsDirectionalLight(light)) {
                 this._lightMesh = LightGizmo._CreateDirectionalLightMesh(this.gizmoLayer.utilityLayerScene);
-            } else if (light instanceof SpotLight) {
+            } else if (IsSpotLight(light)) {
                 this._lightMesh = LightGizmo._CreateSpotLightMesh(this.gizmoLayer.utilityLayerScene);
             } else {
                 this._lightMesh = LightGizmo._CreatePointLightMesh(this.gizmoLayer.utilityLayerScene);

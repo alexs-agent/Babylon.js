@@ -1,7 +1,7 @@
 import { type FrameGraph, type FrameGraphObjectList, type FrameGraphShadowGeneratorTask } from "core/index";
 import { LightingVolume } from "core/Lights/lightingVolume.pure";
-import { DirectionalLight } from "core/Lights/directionalLight.pure";
 import { FrameGraphTask } from "../../frameGraphTask";
+import { IsDirectionalLight } from "core/Misc/typeGuards.functions";
 
 /**
  * Task used to create a lighting volume from a directional light's shadow generator.
@@ -70,7 +70,7 @@ export class FrameGraphLightingVolumeTask extends FrameGraphTask {
 
         const light = this.shadowGenerator.light;
 
-        if (!(light instanceof DirectionalLight)) {
+        if (!IsDirectionalLight(light)) {
             throw new Error(`FrameGraphLightingVolumeTask ${this.name}: light must be a directional light`);
         }
 

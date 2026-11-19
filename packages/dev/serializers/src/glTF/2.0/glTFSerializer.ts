@@ -162,6 +162,10 @@ export class GLTF2Export {
      * @returns Returns the exported data
      */
     public static async GLTFAsync(scene: Scene, fileName: string, options?: IExportOptions): Promise<GLTFData> {
+        // Waiting for the scene needs a default material for meshes without one.
+        if (GLTFExporter._NeedsDefaultMaterial(scene)) {
+            await GLTFExporter._RegisterDefaultMaterialAsync();
+        }
         if (!options || !options.exportWithoutWaitingForScene) {
             await scene.whenReadyAsync();
         }
@@ -181,6 +185,10 @@ export class GLTF2Export {
      * @returns Returns the exported data
      */
     public static async GLBAsync(scene: Scene, fileName: string, options?: IExportOptions): Promise<GLTFData> {
+        // Waiting for the scene needs a default material for meshes without one.
+        if (GLTFExporter._NeedsDefaultMaterial(scene)) {
+            await GLTFExporter._RegisterDefaultMaterialAsync();
+        }
         if (!options || !options.exportWithoutWaitingForScene) {
             await scene.whenReadyAsync();
         }

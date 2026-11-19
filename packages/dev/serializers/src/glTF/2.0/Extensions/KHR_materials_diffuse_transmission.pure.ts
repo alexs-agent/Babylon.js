@@ -2,10 +2,11 @@ import { type IMaterial, type IKHRMaterialsDiffuseTransmission } from "babylonjs
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
+import { type PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { Logger } from "core/Misc/logger";
 import { type Nullable } from "core/types";
+import { IsPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_diffuse_transmission";
 
@@ -72,7 +73,7 @@ export class KHR_materials_diffuse_transmission implements IGLTFExporterExtensio
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
 
-        if (babylonMaterial instanceof PBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+        if (IsPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
             const translucencyIntensityTexture = GetTranslucencyIntensityTexture(context, babylonMaterial);
             if (translucencyIntensityTexture) {
                 additionalTextures.push(translucencyIntensityTexture);
@@ -116,7 +117,7 @@ export class KHR_materials_diffuse_transmission implements IGLTFExporterExtensio
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+            if (IsPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
                 this._wasUsed = true;
 
                 const subs = babylonMaterial.subSurface;

@@ -1,11 +1,11 @@
 import { type FrameGraphTextureHandle, type FrameGraph } from "core/index";
 import { CascadedShadowGenerator } from "../../../Lights/Shadows/cascadedShadowGenerator.pure";
 import { FrameGraphShadowGeneratorTask } from "./shadowGeneratorTask";
-import { DirectionalLight } from "../../../Lights/directionalLight.pure";
 import { DepthTextureType, ThinMinMaxReducer } from "../../../Misc/thinMinMaxReducer";
 import { FrameGraphPostProcessTask } from "../PostProcesses/postProcessTask";
 import { Constants } from "../../../Engines/constants";
 import { textureSizeIsObject } from "../../../Materials/Textures/textureCreationOptions";
+import { IsDirectionalLight } from "../../../Misc/typeGuards.functions";
 
 /**
  * Task used to generate a cascaded shadow map from a list of objects.
@@ -269,7 +269,7 @@ export class FrameGraphCascadedShadowGeneratorTask extends FrameGraphShadowGener
     }
 
     protected override _createShadowGeneratorInstance() {
-        if (!(this.light instanceof DirectionalLight)) {
+        if (!IsDirectionalLight(this.light)) {
             throw new Error(`FrameGraphCascadedShadowGeneratorTask ${this.name}: the CSM shadow generator only supports directional lights.`);
         }
         this._shadowGenerator = new CascadedShadowGenerator(this.mapSize, this.light, this.useFloat32TextureType, this.camera, this.useRedTextureFormat);

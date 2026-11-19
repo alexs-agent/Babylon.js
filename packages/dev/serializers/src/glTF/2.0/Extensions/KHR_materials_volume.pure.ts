@@ -2,11 +2,11 @@ import { type IMaterial, type IKHRMaterialsVolume } from "babylonjs-gltf2interfa
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
+import { type PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { Color3 } from "core/Maths/math.color.pure";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { GetOpenPBRVolumeAttenuation } from "../glTFUtilities";
+import { IsOpenPBRMaterial, IsPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_volume";
 
@@ -49,14 +49,14 @@ export class KHR_materials_volume implements IGLTFExporterExtensionV2 {
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
 
-        if (babylonMaterial instanceof PBRMaterial) {
+        if (IsPBRMaterial(babylonMaterial)) {
             if (this._isExtensionEnabled(babylonMaterial)) {
                 if (babylonMaterial.subSurface.thicknessTexture) {
                     additionalTextures.push(babylonMaterial.subSurface.thicknessTexture);
                 }
                 return additionalTextures;
             }
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             if (babylonMaterial.transmissionWeight > 0 || babylonMaterial.subsurfaceWeight > 0) {
                 if (babylonMaterial.geometryThicknessTexture) {
                     additionalTextures.push(babylonMaterial.geometryThicknessTexture);
@@ -99,7 +99,7 @@ export class KHR_materials_volume implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+            if (IsPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
                 this._wasUsed = true;
 
                 const subs = babylonMaterial.subSurface;
@@ -121,7 +121,7 @@ export class KHR_materials_volume implements IGLTFExporterExtensionV2 {
 
                 node.extensions = node.extensions || {};
                 node.extensions[NAME] = volumeInfo;
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 const transmissionVolume = babylonMaterial.transmissionWeight > 0 && !babylonMaterial.geometryThinWalled;
                 const subsurfaceVolume = babylonMaterial.subsurfaceWeight > 0 && !babylonMaterial.geometryThinWalled;
                 if (transmissionVolume || subsurfaceVolume) {

@@ -155,6 +155,14 @@ export class DirectionalLight extends ShadowLight {
     }
 
     /**
+     * Always true. Lets `IsDirectionalLight()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isDirectionalLight(): true {
+        return true;
+    }
+
+    /**
      * Returns the string "DirectionalLight".
      * @returns The class name
      */

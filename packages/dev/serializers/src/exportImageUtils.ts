@@ -1,11 +1,11 @@
 import { ImageMimeType } from "babylonjs-gltf2interface";
-import { NullEngine } from "core/Engines/nullEngine";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { InternalTextureSource } from "core/Materials/Textures/internalTexture";
 import { type Texture } from "core/Materials/Textures/texture";
 import { GetMimeType } from "core/Misc/fileTools";
 import { Tools } from "core/Misc/tools";
 import { type Nullable } from "core/types";
+import { IsNullEngine } from "core/Misc/typeGuards.functions";
 
 export function GetFileExtensionFromMimeType(mimeType: ImageMimeType): string {
     switch (mimeType) {
@@ -38,7 +38,7 @@ export async function GetCachedImageAsync(babylonTexture: BaseTexture): Promise<
         // produces bytes that round-trip correctly. NullEngine has no GPU readback path,
         // so the cached URL bytes are the only option.
         const engine = babylonTexture.getScene()?.getEngine();
-        if (!(engine instanceof NullEngine)) {
+        if (!IsNullEngine(engine)) {
             return null;
         }
     }

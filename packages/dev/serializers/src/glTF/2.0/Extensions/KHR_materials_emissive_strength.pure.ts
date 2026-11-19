@@ -1,8 +1,8 @@
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
 import { type IMaterial, type IKHRMaterialsEmissiveStrength } from "babylonjs-gltf2interface";
+import { IsPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_emissive_strength";
 
@@ -39,7 +39,7 @@ export class KHR_materials_emissive_strength implements IGLTFExporterExtensionV2
      */
     public async postExportMaterialAsync(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return await new Promise((resolve) => {
-            if (!(babylonMaterial instanceof PBRMaterial)) {
+            if (!IsPBRMaterial(babylonMaterial)) {
                 return resolve(node);
             }
 

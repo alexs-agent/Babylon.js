@@ -2,9 +2,9 @@ import { type IMaterial, type IKHRMaterialsSpecular, type IEXTMaterialsSpecularE
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
+import { type PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { IsOpenPBRMaterial, IsPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_specular";
 
@@ -48,7 +48,7 @@ export class KHR_materials_specular implements IGLTFExporterExtensionV2 {
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
 
-        if (babylonMaterial instanceof PBRMaterial) {
+        if (IsPBRMaterial(babylonMaterial)) {
             if (this._isExtensionEnabled(babylonMaterial)) {
                 if (babylonMaterial.metallicReflectanceTexture) {
                     additionalTextures.push(babylonMaterial.metallicReflectanceTexture);
@@ -89,7 +89,7 @@ export class KHR_materials_specular implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+            if (IsPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
                 this._wasUsed = true;
 
                 node.extensions = node.extensions || {};
@@ -113,7 +113,7 @@ export class KHR_materials_specular implements IGLTFExporterExtensionV2 {
                 }
 
                 node.extensions[NAME] = specularInfo;
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 node.extensions = node.extensions || {};
 
                 const specularWeightTexture = this._exporter._materialExporter.getTextureInfo(babylonMaterial.specularWeightTexture) ?? undefined;

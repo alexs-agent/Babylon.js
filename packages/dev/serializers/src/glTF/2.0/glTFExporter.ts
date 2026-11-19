@@ -63,23 +63,18 @@ import {
 import { IsNoopNode } from "../../exportUtils";
 import { BufferManager } from "./bufferManager";
 import { Camera } from "core/Cameras/camera";
-import { MultiMaterial } from "core/Materials/multiMaterial";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial";
-import { StandardMaterial } from "core/Materials/standardMaterial";
 import { Logger } from "core/Misc/logger";
 import { EnumerateFloatValues, AreIndices32Bits } from "core/Buffers/bufferUtils";
 import { type Bone, type Skeleton } from "core/Bones";
 import { _GLTFAnimation } from "./glTFAnimation";
 import { type MorphTarget } from "core/Morph";
 import { BuildMorphTargetBuffers, type IMorphTargetData } from "./glTFMorphTargetsUtilities";
-import { LinesMesh } from "core/Meshes/linesMesh";
-import { GreasedLineBaseMesh } from "core/Meshes/GreasedLine/greasedLineBaseMesh";
 import { Color3, Color4 } from "core/Maths/math.color";
 import { TargetCamera } from "core/Cameras/targetCamera";
 import { Epsilon } from "core/Maths/math.constants";
 import { DataWriter } from "./dataWriter";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial";
 import { type AnimationGroup } from "core/Animations/animationGroup";
+import { IsGreasedLineBaseMesh, IsLinesMesh, IsMultiMaterial, IsOpenPBRMaterial, IsPBRBaseMaterial, IsStandardMaterial } from "core/Misc/typeGuards.functions";
 
 class ExporterState {
     // Babylon indices array, start, count, offset, flip -> glTF accessor index
@@ -866,7 +861,33 @@ export class GLTFExporter {
         }
     }
 
+    /**
+     * Checks whether a default material must be registered before the scene can be exported.
+     * Meshes without a material use the scene's default material, which comes from StandardMaterial.
+     * The exporter used to import StandardMaterial for this. It now loads it only when needed (see _RegisterDefaultMaterialAsync),
+     * so apps that never export a mesh without a material don't have to bundle StandardMaterial.
+     * @param scene defines the scene to export
+     * @returns true if a mesh has no material and no default material factory is registered
+     * @internal
+     */
+    public static _NeedsDefaultMaterial(scene: Scene): boolean {
+        return !scene._hasDefaultMaterial && scene.meshes.some((mesh) => !mesh.material);
+    }
+
+    /**
+     * Loads StandardMaterial and registers it as the default material factory.
+     * @internal
+     */
+    public static async _RegisterDefaultMaterialAsync(): Promise<void> {
+        const { RegisterStandardMaterial } = await import("core/Materials/standardMaterial.pure");
+        RegisterStandardMaterial();
+    }
+
     private async _exportSceneAsync(): Promise<void> {
+        if (GLTFExporter._NeedsDefaultMaterial(this._babylonScene)) {
+            await GLTFExporter._RegisterDefaultMaterialAsync();
+        }
+
         const scene: IScene = { nodes: [] };
 
         // Scene metadata
@@ -1152,7 +1173,7 @@ export class GLTFExporter {
                     }
                     // Convert StandardMaterial vertex colors from gamma to linear space.
                     case VertexBuffer.ColorKind: {
-                        const stdMaterialCount = meshes.filter((mesh) => mesh.material instanceof StandardMaterial || mesh.material == null).length;
+                        const stdMaterialCount = meshes.filter((mesh) => IsStandardMaterial(mesh.material) || mesh.material == null).length;
                         if (stdMaterialCount == 0) {
                             break; // Buffer not used by StandardMaterials, so no conversion needed.
                         }
@@ -1553,12 +1574,12 @@ export class GLTFExporter {
         let materialIndex = this._materialMap.get(babylonMaterial);
         if (materialIndex === undefined) {
             const hasUVs = vertexBuffers && Object.keys(vertexBuffers).some((kind) => kind.startsWith("uv"));
-            babylonMaterial = babylonMaterial instanceof MultiMaterial ? babylonMaterial.subMaterials[subMesh.materialIndex]! : babylonMaterial;
-            if (babylonMaterial instanceof PBRBaseMaterial) {
+            babylonMaterial = IsMultiMaterial(babylonMaterial) ? babylonMaterial.subMaterials[subMesh.materialIndex]! : babylonMaterial;
+            if (IsPBRBaseMaterial(babylonMaterial)) {
                 materialIndex = await this._materialExporter.exportPBRMaterialAsync(babylonMaterial, hasUVs);
-            } else if (babylonMaterial instanceof StandardMaterial) {
+            } else if (IsStandardMaterial(babylonMaterial)) {
                 materialIndex = await this._materialExporter.exportStandardMaterialAsync(babylonMaterial, hasUVs);
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 materialIndex = await this._materialExporter.exportOpenPBRMaterialAsync(babylonMaterial, hasUVs);
             } else {
                 Logger.Warn(`Unsupported material '${babylonMaterial.name}' with type ${babylonMaterial.getClassName()}`);
@@ -1586,8 +1607,8 @@ export class GLTFExporter {
         const vertexBuffers = babylonMesh.geometry?.getVertexBuffers();
         const morphTargets = state.getMorphTargetsFromMesh(babylonMesh);
 
-        const isLinesMesh = babylonMesh instanceof LinesMesh;
-        const isGreasedLineMesh = babylonMesh instanceof GreasedLineBaseMesh;
+        const isLinesMesh = IsLinesMesh(babylonMesh);
+        const isGreasedLineMesh = IsGreasedLineBaseMesh(babylonMesh);
 
         const subMeshes = babylonMesh.subMeshes;
         if (vertexBuffers && subMeshes && subMeshes.length > 0) {

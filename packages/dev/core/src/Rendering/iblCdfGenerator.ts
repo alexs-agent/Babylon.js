@@ -10,7 +10,6 @@ import { Vector3, Vector4 } from "../Maths/math.vector.pure";
 import { RawTexture } from "../Materials/Textures/rawTexture";
 import { type BaseTexture } from "../Materials/Textures/baseTexture";
 import { Observable } from "../Misc/observable";
-import { CubeTexture } from "../Materials/Textures/cubeTexture.pure";
 import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { _WarnImport } from "../Misc/devTools";
 import { type Nullable } from "../types";
@@ -18,6 +17,7 @@ import { EngineStore } from "../Engines/engineStore";
 import { Logger } from "../Misc/logger";
 import { _RetryWithInterval } from "../Misc/timingTools";
 import { RegisterIblCdfGeneratorSceneComponent } from "./iblCdfGeneratorSceneComponent.pure";
+import { IsCubeTexture } from "../Misc/typeGuards.functions";
 
 /**
  * Build cdf maps to be used for IBL importance sampling.
@@ -104,7 +104,7 @@ export class IblCdfGenerator {
             if (observer) {
                 this._iblSourceLoadUnsubscribe = () => source.onLoadObservable.remove(observer);
             }
-        } else if (source instanceof CubeTexture) {
+        } else if (IsCubeTexture(source)) {
             const observer = source.onLoadObservable.addOnce(recreateFromObservedSourceIfReady);
             if (observer) {
                 this._iblSourceLoadUnsubscribe = () => source.onLoadObservable.remove(observer);

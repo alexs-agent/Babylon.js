@@ -11,11 +11,11 @@ import { type Effect } from "../../../effect.pure";
 import { type NodeMaterial, type NodeMaterialDefines } from "../../nodeMaterial.pure";
 import { type Mesh } from "../../../../Meshes/mesh.pure";
 import { type Light } from "../../../../Lights/light";
-import { PointLight } from "../../../../Lights/pointLight.pure";
 import { type ShadowGenerator } from "../../../../Lights/Shadows/shadowGenerator";
 import { type ShadowLight } from "../../../../Lights";
 import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { RegisterClass } from "../../../../Misc/typeStore";
+import { IsPointLight } from "../../../../Misc/typeGuards.functions";
 
 /**
  * Block used to get data information from a light
@@ -187,7 +187,7 @@ export class LightInformationBlock extends NodeMaterialBlock {
         this._forcePrepareDefines = false;
 
         const light = this.light;
-        defines.setValue(this._lightTypeDefineName, light && light instanceof PointLight ? true : false, true);
+        defines.setValue(this._lightTypeDefineName, light && IsPointLight(light) ? true : false, true);
     }
 
     protected override _buildBlock(state: NodeMaterialBuildState) {

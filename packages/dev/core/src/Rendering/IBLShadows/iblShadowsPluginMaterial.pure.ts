@@ -6,12 +6,13 @@ import { type InternalTexture } from "core/Materials/Textures/internalTexture";
 import { type Material } from "core/Materials/material.pure";
 import { Constants } from "core/Engines/constants";
 import { type StandardMaterial } from "core/Materials/standardMaterial.pure";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
+import { type PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { type UniformBuffer } from "core/Materials/uniformBuffer";
 import { expandToProperty, serialize } from "core/Misc/decorators";
 import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { RegisterClass } from "core/Misc/typeStore";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 /**
  * @internal
@@ -94,7 +95,7 @@ export class IBLShadowsPluginMaterial extends MaterialPluginBase {
     }
 
     private _isOpenPBRMaterial(): boolean {
-        return this._material.getClassName() === "OpenPBRMaterial";
+        return IsOpenPBRMaterial(this._material);
     }
 
     private _isShadowOnlyMaterial(): boolean {
@@ -181,7 +182,7 @@ export class IBLShadowsPluginMaterial extends MaterialPluginBase {
             `,
             };
 
-            if (this._material instanceof PBRBaseMaterial) {
+            if (IsPBRBaseMaterial(this._material)) {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 frag["CUSTOM_FRAGMENT_BEFORE_FINALCOLORCOMPOSITION"] = `
                 #ifdef RENDER_WITH_IBL_SHADOWS
@@ -275,7 +276,7 @@ export class IBLShadowsPluginMaterial extends MaterialPluginBase {
             `,
             };
 
-            if (this._material instanceof PBRBaseMaterial) {
+            if (IsPBRBaseMaterial(this._material)) {
                 // eslint-disable-next-line @typescript-eslint/naming-convention
                 frag["CUSTOM_FRAGMENT_BEFORE_FINALCOLORCOMPOSITION"] = `
                 #ifdef RENDER_WITH_IBL_SHADOWS

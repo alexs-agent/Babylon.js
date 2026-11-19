@@ -269,6 +269,14 @@ export class SpotLight extends ShadowLight {
     }
 
     /**
+     * Always true. Lets `IsSpotLight()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isSpotLight(): true {
+        return true;
+    }
+
+    /**
      * Returns the string "SpotLight".
      * @returns the class name
      */

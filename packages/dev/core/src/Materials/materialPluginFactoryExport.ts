@@ -3,15 +3,14 @@ import { type Nullable } from "../types";
 import { DetailMapConfiguration } from "./material.detailMapConfiguration";
 import { type MaterialPluginBase } from "./materialPluginBase";
 import { PBRAnisotropicConfiguration } from "./PBR/pbrAnisotropicConfiguration";
-import { PBRBaseMaterial } from "./PBR/pbrBaseMaterial.pure";
 import { PBRBRDFConfiguration } from "./PBR/pbrBRDFConfiguration";
 import { PBRClearCoatConfiguration } from "./PBR/pbrClearCoatConfiguration";
 import { PBRIridescenceConfiguration } from "./PBR/pbrIridescenceConfiguration";
 import { PBRSheenConfiguration } from "./PBR/pbrSheenConfiguration";
 import { PBRSubSurfaceConfiguration } from "./PBR/pbrSubSurfaceConfiguration";
-import { StandardMaterial } from "./standardMaterial.pure";
 
 import { type Material } from "./material";
+import { IsPBRBaseMaterial, IsStandardMaterial } from "../Misc/typeGuards.functions";
 
 /**
  * Creates an instance of the anisotropic plugin
@@ -19,7 +18,7 @@ import { type Material } from "./material";
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createPBRAnisotropicPlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial) {
+    if (IsPBRBaseMaterial(material)) {
         return new PBRAnisotropicConfiguration(material);
     }
     return null;
@@ -31,7 +30,7 @@ export function createPBRAnisotropicPlugin(material: Material): Nullable<Materia
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createPBRBRDFPlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial) {
+    if (IsPBRBaseMaterial(material)) {
         return new PBRBRDFConfiguration(material);
     }
     return null;
@@ -43,7 +42,7 @@ export function createPBRBRDFPlugin(material: Material): Nullable<MaterialPlugin
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createPBRClearCoatPlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial) {
+    if (IsPBRBaseMaterial(material)) {
         return new PBRClearCoatConfiguration(material);
     }
     return null;
@@ -55,7 +54,7 @@ export function createPBRClearCoatPlugin(material: Material): Nullable<MaterialP
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createPBRIridescencePlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial) {
+    if (IsPBRBaseMaterial(material)) {
         return new PBRIridescenceConfiguration(material);
     }
     return null;
@@ -67,7 +66,7 @@ export function createPBRIridescencePlugin(material: Material): Nullable<Materia
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createPBRSheenPlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial) {
+    if (IsPBRBaseMaterial(material)) {
         return new PBRSheenConfiguration(material);
     }
     return null;
@@ -79,7 +78,7 @@ export function createPBRSheenPlugin(material: Material): Nullable<MaterialPlugi
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createPBRSubSurfacePlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial) {
+    if (IsPBRBaseMaterial(material)) {
         return new PBRSubSurfaceConfiguration(material);
     }
     return null;
@@ -91,7 +90,7 @@ export function createPBRSubSurfacePlugin(material: Material): Nullable<Material
  * @returns the plugin instance or null if the plugin is incompatible with material
  */
 export function createDetailMapPlugin(material: Material): Nullable<MaterialPluginBase> {
-    if (material instanceof PBRBaseMaterial || material instanceof StandardMaterial) {
+    if (IsPBRBaseMaterial(material) || IsStandardMaterial(material)) {
         return new DetailMapConfiguration(material);
     }
     return null;

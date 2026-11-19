@@ -1,6 +1,5 @@
 import { Observable } from "../Misc/observable";
 import { type Nullable } from "../types";
-import { ArcRotateCamera } from "../Cameras/arcRotateCamera.pure";
 import { type Scene } from "../scene";
 import { Vector3 } from "../Maths/math.vector.pure";
 import { Color3, Color4 } from "../Maths/math.color.pure";
@@ -17,6 +16,7 @@ import { CreatePlane } from "../Meshes/Builders/planeBuilder.pure";
 import { CreateBox } from "../Meshes/Builders/boxBuilder.pure";
 import { Plane } from "../Maths/math.plane";
 import { Tools } from "core/Misc/tools.pure";
+import { IsArcRotateCamera } from "../Misc/typeGuards.functions";
 
 /**
  * Represents the different options available during the creation of
@@ -515,7 +515,7 @@ export class EnvironmentHelper {
         const sceneDiagonal = sceneExtends.max.subtract(sceneExtends.min);
 
         if (this._options.sizeAuto) {
-            if (this._scene.activeCamera instanceof ArcRotateCamera && this._scene.activeCamera.upperRadiusLimit) {
+            if (IsArcRotateCamera(this._scene.activeCamera) && this._scene.activeCamera.upperRadiusLimit) {
                 groundSize = this._scene.activeCamera.upperRadiusLimit * 2;
                 skyboxSize = groundSize;
             }

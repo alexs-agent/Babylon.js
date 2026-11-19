@@ -2,14 +2,14 @@ import { type IMaterial, type IKHRMaterialsCoat } from "babylonjs-gltf2interface
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { MergeTexturesAsync, CreateRGBAConfiguration, CreateTextureInput, CreateConstantInput } from "core/Materials/Textures/textureMerger";
 import { Texture } from "core/Materials/Textures/texture.pure";
 import { type Nullable } from "core/types";
 import { type InternalTexture } from "core/Materials/Textures/internalTexture";
 import { GetSampledTextureKey } from "../glTFUtilities";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_coat";
 
@@ -186,7 +186,7 @@ export class KHR_materials_coat implements IGLTFExporterExtensionV2 {
 
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
-        if (babylonMaterial instanceof PBRBaseMaterial) {
+        if (IsPBRBaseMaterial(babylonMaterial)) {
             if (babylonMaterial.clearCoat.isEnabled) {
                 if (babylonMaterial.clearCoat.texture) {
                     additionalTextures.push(babylonMaterial.clearCoat.texture);
@@ -202,7 +202,7 @@ export class KHR_materials_coat implements IGLTFExporterExtensionV2 {
                 }
                 return additionalTextures;
             }
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             if (babylonMaterial.coatWeight > 0) {
                 // We will merge the coat_weight and coat_roughness textures, if needed.
                 // However, we want to retain the original texture's transforms and sampling info.
@@ -288,7 +288,7 @@ export class KHR_materials_coat implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof PBRBaseMaterial) {
+            if (IsPBRBaseMaterial(babylonMaterial)) {
                 if (!babylonMaterial.clearCoat.isEnabled) {
                     resolve(node);
                     return;
@@ -330,7 +330,7 @@ export class KHR_materials_coat implements IGLTFExporterExtensionV2 {
                 }
 
                 node.extensions[NAME] = coatInfo;
-            } else if (babylonMaterial instanceof OpenPBRMaterial) {
+            } else if (IsOpenPBRMaterial(babylonMaterial)) {
                 if (babylonMaterial.coatWeight == 0.0) {
                     resolve(node);
                     return;

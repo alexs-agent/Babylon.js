@@ -688,6 +688,14 @@ export class PBRMaterial extends PBRBaseMaterial {
     }
 
     /**
+     * Always true. Lets `IsPBRMaterial()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isPBRMaterial(): true {
+        return true;
+    }
+
+    /**
      * @returns the name of this material class.
      */
     public override getClassName(): string {

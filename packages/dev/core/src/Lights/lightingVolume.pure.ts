@@ -4,7 +4,7 @@ import { type AbstractEngine, type Engine, type InternalTexture, type Nullable, 
 import { AbortError } from "core/Misc/error";
 import { Constants } from "core/Engines/constants";
 import { Matrix, Vector3, TmpVectors } from "core/Maths/math.vector.pure";
-import { DirectionalLight } from "core/Lights/directionalLight.pure";
+import { type DirectionalLight } from "core/Lights/directionalLight.pure";
 import { Mesh } from "core/Meshes/mesh.pure";
 import { ComputeShader } from "core/Compute/computeShader.pure";
 import { CopyTextureToTexture } from "core/Misc/copyTextureToTexture";
@@ -12,6 +12,7 @@ import { UniformBuffer } from "core/Materials/uniformBuffer";
 import { StorageBuffer } from "core/Buffers/storageBuffer";
 import { BaseTexture } from "core/Materials/Textures/baseTexture.pure";
 import { VertexBuffer } from "core/Buffers/buffer.pure";
+import { IsDirectionalLight } from "core/Misc/typeGuards.functions";
 
 const TmpVec3 = /*#__PURE__*/ new Vector3();
 
@@ -53,7 +54,7 @@ export class LightingVolume {
     public set shadowGenerator(sg: ShadowGenerator) {
         const light = sg.getLight();
 
-        if (!(light instanceof DirectionalLight)) {
+        if (!IsDirectionalLight(light)) {
             throw new Error(`LightingVolumeMesh ${this._name}: light must be a directional light`);
         }
 
@@ -149,7 +150,7 @@ export class LightingVolume {
     constructor(name: string, scene: Scene, shadowGenerator?: ShadowGenerator, tesselation = 64) {
         const light = shadowGenerator ? shadowGenerator.getLight() : undefined;
 
-        if (light && !(light instanceof DirectionalLight)) {
+        if (light && !IsDirectionalLight(light)) {
             throw new Error(`LightingVolumeMesh ${name}: light must be a directional light`);
         }
 

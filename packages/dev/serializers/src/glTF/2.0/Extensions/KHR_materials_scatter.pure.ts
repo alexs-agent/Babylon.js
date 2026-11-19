@@ -2,7 +2,7 @@ import { type IMaterial, type IKHRMaterialsScatter } from "babylonjs-gltf2interf
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { Color3, Color4 } from "core/Maths/math.color.pure";
 import { type Nullable } from "core/types";
@@ -29,6 +29,7 @@ import { MergeTexturesAsync, CreateRGBAConfiguration, CreateTextureInput, Create
 import { Texture } from "core/Materials/Textures/texture.pure";
 import { type InternalTexture } from "core/Materials/Textures/internalTexture";
 import { CopyTextureSampling, GetOpenPBRVolumeAttenuation, MinTransmissionColor } from "../glTFUtilities";
+import { IsOpenPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_scatter";
 
@@ -124,7 +125,7 @@ export class KHR_materials_scatter implements IGLTFExporterExtensionV2 {
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
 
-        if (babylonMaterial instanceof OpenPBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+        if (IsOpenPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
             const result = await this._bakeScatterAsync(babylonMaterial);
             this._scatterResults.set(babylonMaterial, result);
             if (result.strengthTexture) {
@@ -470,7 +471,7 @@ export class KHR_materials_scatter implements IGLTFExporterExtensionV2 {
     // eslint-disable-next-line no-restricted-syntax
     public postExportMaterialAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return new Promise((resolve) => {
-            if (babylonMaterial instanceof OpenPBRMaterial && this._isExtensionEnabled(babylonMaterial)) {
+            if (IsOpenPBRMaterial(babylonMaterial) && this._isExtensionEnabled(babylonMaterial)) {
                 this._wasUsed = true;
 
                 const result = this._scatterResults.get(babylonMaterial);

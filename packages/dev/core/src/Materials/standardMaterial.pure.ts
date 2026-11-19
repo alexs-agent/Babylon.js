@@ -661,6 +661,14 @@ export class StandardMaterial extends StandardMaterialBase {
     }
 
     /**
+     * Always true. Lets `IsStandardMaterial()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isStandardMaterial(): true {
+        return true;
+    }
+
+    /**
      * Gets the current class name of the material e.g. "StandardMaterial"
      * Mainly use in serialization.
      * @returns the class name

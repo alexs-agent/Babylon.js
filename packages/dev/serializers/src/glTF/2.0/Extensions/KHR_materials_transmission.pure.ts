@@ -2,10 +2,8 @@ import { type IMaterial, type IKHRMaterialsTransmission } from "babylonjs-gltf2i
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { PBRMaterial } from "core/Materials/PBR/pbrMaterial.pure";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { Logger } from "core/Misc/logger";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { Color4 } from "core/Maths/math.color.pure";
 import { type Nullable } from "core/types";
 import {
@@ -20,6 +18,7 @@ import {
     type ITextureProcessOperand,
 } from "core/Materials/Textures/textureProcessor";
 import { MergeTexturesAsync, CreateRGBAConfiguration, CreateTextureInput, CreateConstantInput } from "core/Materials/Textures/textureMerger";
+import { IsOpenPBRMaterial, IsPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_transmission";
 
@@ -82,14 +81,14 @@ export class KHR_materials_transmission implements IGLTFExporterExtensionV2 {
     public async postExportMaterialAdditionalTexturesAsync?(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
         const additionalTextures: BaseTexture[] = [];
 
-        if (babylonMaterial instanceof PBRMaterial) {
+        if (IsPBRMaterial(babylonMaterial)) {
             if (this._isExtensionEnabled(babylonMaterial)) {
                 if (babylonMaterial.subSurface.refractionIntensityTexture && babylonMaterial.subSurface.useGltfStyleTextures) {
                     additionalTextures.push(babylonMaterial.subSurface.refractionIntensityTexture);
                 }
                 return additionalTextures;
             }
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             if (this._isExtensionEnabled(babylonMaterial)) {
                 const subsurfaceWeight = babylonMaterial.subsurfaceWeight;
                 const transmissionWeight = babylonMaterial.transmissionWeight;
@@ -261,9 +260,9 @@ export class KHR_materials_transmission implements IGLTFExporterExtensionV2 {
 
     private _isExtensionEnabled(mat: Material): boolean {
         // This extension must not be used on a material that also uses KHR_materials_unlit
-        if (mat instanceof OpenPBRMaterial && !mat.unlit) {
+        if (IsOpenPBRMaterial(mat) && !mat.unlit) {
             return mat.transmissionWeight > 0 || mat.subsurfaceWeight > 0;
-        } else if (mat instanceof PBRMaterial && !mat.unlit) {
+        } else if (IsPBRMaterial(mat) && !mat.unlit) {
             const subs = mat.subSurface;
             return (
                 (subs.isRefractionEnabled && subs.refractionIntensity != undefined && subs.refractionIntensity != 0) ||
@@ -284,7 +283,7 @@ export class KHR_materials_transmission implements IGLTFExporterExtensionV2 {
         if (!this._isExtensionEnabled(babylonMaterial)) {
             return node;
         }
-        if (babylonMaterial instanceof PBRMaterial) {
+        if (IsPBRMaterial(babylonMaterial)) {
             this._wasUsed = true;
 
             const subSurface = babylonMaterial.subSurface;
@@ -308,7 +307,7 @@ export class KHR_materials_transmission implements IGLTFExporterExtensionV2 {
 
             node.extensions ||= {};
             node.extensions[NAME] = transmissionInfo;
-        } else if (babylonMaterial instanceof OpenPBRMaterial) {
+        } else if (IsOpenPBRMaterial(babylonMaterial)) {
             this._wasUsed = true;
 
             const operand = this._transmissionOperands.get(babylonMaterial);

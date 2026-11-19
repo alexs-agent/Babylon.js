@@ -2,12 +2,13 @@ import { type IMaterial, type IKHRMaterialsFuzz } from "babylonjs-gltf2interface
 import { type IGLTFExporterExtensionV2 } from "../glTFExporterExtension";
 import { GLTFExporter } from "../glTFExporter";
 import { type Material } from "core/Materials/material";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
+import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { MergeTexturesAsync, CreateRGBAConfiguration, CreateTextureInput, CreateConstantInput } from "core/Materials/Textures/textureMerger";
 import { type BaseTexture } from "core/Materials/Textures/baseTexture";
 import { type Nullable } from "core/types";
 import { type InternalTexture } from "core/Materials/Textures/internalTexture";
 import { Texture } from "core/Materials/Textures/texture.pure";
+import { IsOpenPBRMaterial } from "core/Misc/typeGuards.functions";
 
 const NAME = "KHR_materials_fuzz";
 
@@ -130,7 +131,7 @@ export class KHR_materials_fuzz implements IGLTFExporterExtensionV2 {
     }
 
     public async postExportMaterialAdditionalTexturesAsync(context: string, node: IMaterial, babylonMaterial: Material): Promise<BaseTexture[]> {
-        if (babylonMaterial instanceof OpenPBRMaterial) {
+        if (IsOpenPBRMaterial(babylonMaterial)) {
             const additionalTextures: BaseTexture[] = [];
             if (babylonMaterial.fuzzWeight > 0.0) {
                 if (babylonMaterial.fuzzWeightTexture) {
@@ -181,7 +182,7 @@ export class KHR_materials_fuzz implements IGLTFExporterExtensionV2 {
 
     public async postExportMaterialAsync(context: string, node: IMaterial, babylonMaterial: Material): Promise<IMaterial> {
         return await new Promise((resolve) => {
-            if (babylonMaterial instanceof OpenPBRMaterial) {
+            if (IsOpenPBRMaterial(babylonMaterial)) {
                 if (babylonMaterial.fuzzWeight == 0.0) {
                     resolve(node);
                     return;

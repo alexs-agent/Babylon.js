@@ -16,7 +16,7 @@ import { type RenderTargetWrapper } from "core/Engines/renderTargetWrapper";
 import { MaterialPluginBase } from "core/Materials/materialPluginBase.pure";
 import { type InternalTexture } from "core/Materials/Textures/internalTexture";
 import { type StandardMaterial } from "core/Materials/standardMaterial.pure";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
+import { type PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial.pure";
 import { type UniformBuffer } from "core/Materials/uniformBuffer";
 import { type AbstractEngine } from "core/Engines/abstractEngine.pure";
 import { GeometryBufferRenderer } from "../geometryBufferRenderer.pure";
@@ -26,6 +26,7 @@ import { expandToProperty, serialize } from "core/Misc/decorators";
 import { MaterialDefines } from "core/Materials/materialDefines";
 import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { RegisterClass } from "core/Misc/typeStore";
+import { IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 /**
  * Reflective Shadow Maps were first described in http://www.klayge.org/material/3_12/GI/rsm.pdf by Carsten Dachsbacher and Marc Stamminger
@@ -955,7 +956,7 @@ export class GIRSMRenderPluginMaterial extends MaterialPluginBase {
 
         this._internalMarkAllSubMeshesAsTexturesDirty = material._dirtyCallbacks[Constants.MATERIAL_TextureDirtyFlag];
 
-        this._isPBR = material instanceof PBRBaseMaterial;
+        this._isPBR = IsPBRBaseMaterial(material);
     }
 
     /**

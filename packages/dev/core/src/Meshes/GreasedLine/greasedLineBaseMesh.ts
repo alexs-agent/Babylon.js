@@ -192,6 +192,14 @@ export abstract class GreasedLineBaseMesh extends Mesh {
     }
 
     /**
+     * Always true. Lets `IsGreasedLineBaseMesh()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isGreasedLineBaseMesh(): true {
+        return true;
+    }
+
+    /**
      * "GreasedLineMesh"
      * @returns "GreasedLineMesh"
      */

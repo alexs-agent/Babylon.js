@@ -264,6 +264,14 @@ export class CubeTexture extends BaseTexture {
     }
 
     /**
+     * Always true. Lets `IsCubeTexture()` recognize this class and its subclasses without importing it.
+     * @internal
+     */
+    public get _isCubeTexture(): true {
+        return true;
+    }
+
+    /**
      * Get the current class name of the texture useful for serialization or dynamic coding.
      * @returns "CubeTexture"
      */

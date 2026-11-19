@@ -33,13 +33,14 @@ import { EncodeImageAsync } from "core/Misc/dumpTools";
 
 import { type Material } from "core/Materials/material";
 import { type StandardMaterial } from "core/Materials/standardMaterial";
-import { PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial";
+import { type PBRBaseMaterial } from "core/Materials/PBR/pbrBaseMaterial";
 import { SpecularPowerToRoughness } from "core/Helpers/materialConversionHelper";
-import { OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial";
+import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial";
 import { MergeTexturesAsync, CreateRGBAConfiguration, CreateTextureInput, CreateConstantInput } from "core/Materials/Textures/textureMerger";
 import { GetCachedImageAsync, GetFileExtensionFromMimeType } from "../../exportImageUtils";
 import { CopyTextureSampling, GetSampledTextureKey } from "./glTFUtilities";
 import { type ProceduralTexture } from "core/Materials/Textures/Procedurals/proceduralTexture";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 const Epsilon = 1e-6;
 const DielectricSpecular = new Color3(0.04, 0.04, 0.04) as DeepImmutable<Color3>;
@@ -608,7 +609,7 @@ export class GLTFMaterialExporter {
         };
 
         if (hasUVs) {
-            if (babylonPBRMaterial instanceof OpenPBRMaterial) {
+            if (IsOpenPBRMaterial(babylonPBRMaterial)) {
                 // Skip base color texture generation when an extension (e.g. KHR_materials_transmission)
                 // will overwrite the base color anyway; otherwise the texture/image baked here would be
                 // orphaned in the output. The extension re-bakes base color (including opacity) itself.
@@ -932,7 +933,7 @@ export class GLTFMaterialExporter {
         if (hasUVs) {
             const promises: Promise<void>[] = [];
 
-            const bumpTexture = babylonPBRMaterial instanceof PBRBaseMaterial ? babylonPBRMaterial._bumpTexture : babylonPBRMaterial.geometryNormalTexture;
+            const bumpTexture = IsPBRBaseMaterial(babylonPBRMaterial) ? babylonPBRMaterial._bumpTexture : babylonPBRMaterial.geometryNormalTexture;
             if (bumpTexture) {
                 promises.push(
                     this.exportTextureAsync(bumpTexture).then((glTFTexture) => {
@@ -946,11 +947,11 @@ export class GLTFMaterialExporter {
                 );
             }
 
-            const ambientTexture = babylonPBRMaterial instanceof PBRBaseMaterial ? babylonPBRMaterial._ambientTexture : babylonPBRMaterial.ambientOcclusionTexture;
+            const ambientTexture = IsPBRBaseMaterial(babylonPBRMaterial) ? babylonPBRMaterial._ambientTexture : babylonPBRMaterial.ambientOcclusionTexture;
             if (ambientTexture) {
                 promises.push(
                     new Promise<Nullable<ITextureInfo>>(async (resolve) => {
-                        if (babylonPBRMaterial instanceof OpenPBRMaterial && glTFPbrMetallicRoughness.metallicRoughnessTexture) {
+                        if (IsOpenPBRMaterial(babylonPBRMaterial) && glTFPbrMetallicRoughness.metallicRoughnessTexture) {
                             // The metallicRoughnessTexture already contains the ambient occlusion data in its red channel, we don't need to export it again
                             // However, we still need to set the texture info on the material.
                             const samplerIndex = this._exportTextureSampler(ambientTexture);
@@ -971,7 +972,7 @@ export class GLTFMaterialExporter {
                             };
 
                             glTFMaterial.occlusionTexture = occlusionTexture;
-                            if (babylonPBRMaterial instanceof PBRBaseMaterial) {
+                            if (IsPBRBaseMaterial(babylonPBRMaterial)) {
                                 occlusionTexture.strength = babylonPBRMaterial._ambientTextureStrength;
                             } else {
                                 occlusionTexture.strength = babylonPBRMaterial.ambientOcclusionTexture!.level;
@@ -981,7 +982,7 @@ export class GLTFMaterialExporter {
                 );
             }
 
-            const emissiveTexture = babylonPBRMaterial instanceof PBRBaseMaterial ? babylonPBRMaterial._emissiveTexture : babylonPBRMaterial.emissionColorTexture;
+            const emissiveTexture = IsPBRBaseMaterial(babylonPBRMaterial) ? babylonPBRMaterial._emissiveTexture : babylonPBRMaterial.emissionColorTexture;
             if (emissiveTexture) {
                 promises.push(
                     this.exportTextureAsync(emissiveTexture).then((glTFTexture) => {
@@ -998,7 +999,7 @@ export class GLTFMaterialExporter {
             }
         }
 
-        const emissiveColor = babylonPBRMaterial instanceof PBRBaseMaterial ? babylonPBRMaterial._emissiveColor : babylonPBRMaterial.emissionColor;
+        const emissiveColor = IsPBRBaseMaterial(babylonPBRMaterial) ? babylonPBRMaterial._emissiveColor : babylonPBRMaterial.emissionColor;
         if (!emissiveColor.equalsWithEpsilon(Black, Epsilon)) {
             glTFMaterial.emissiveFactor = emissiveColor.asArray();
         }

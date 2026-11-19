@@ -12,7 +12,7 @@ import { expandToProperty, serialize } from "core/Misc/decorators";
 import { ShaderLanguage } from "core/Materials/shaderLanguage";
 import { type OpenPBRMaterial } from "core/Materials/PBR/openpbrMaterial.pure";
 import { RegisterClass } from "core/Misc/typeStore";
-import { IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
+import { IsOpenPBRMaterial, IsPBRBaseMaterial } from "core/Misc/typeGuards.functions";
 
 /**
  * @internal
@@ -95,7 +95,7 @@ export class IBLShadowsPluginMaterial extends MaterialPluginBase {
     }
 
     private _isOpenPBRMaterial(): boolean {
-        return this._material.getClassName() === "OpenPBRMaterial";
+        return IsOpenPBRMaterial(this._material);
     }
 
     private _isShadowOnlyMaterial(): boolean {
